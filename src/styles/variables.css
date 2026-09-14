@@ -1,0 +1,18 @@
+:root{
+  --blue:#146bff;
+  --blue-dark:#071a3a;
+  --blue-deep:#0a2f78;
+  --blue-soft:#dfeaff;
+  --cyan:#71d7ff;
+  --paper:#f5f8ff;
+  --paper-2:#e9f0fb;
+  --ink:#07111f;
+  --muted:#4b5c75;
+  --white:#ffffff;
+  --accent:#ff5c7a;
+  --shadow:8px 8px 0 var(--ink);
+  --shadow-blue:8px 8px 0 var(--blue);
+  --font-heading:"Space Grotesk",system-ui,sans-serif;
+  --font-body:"DM Sans",system-ui,sans-serif;
+  --font-hand:"Caveat",cursive;
+}

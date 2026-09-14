@@ -1,0 +1,3 @@
+import {createContext,useContext,useState} from "react"; import {SECTIONS} from "../data/sections";
+const C=createContext(null);
+export function JourneyProvider({children}){const [stepIndex,setStep]=useState(0);const goNext=()=>setStep(i=>Math.min(i+1,SECTIONS.length-1));const goToStep=i=>setStep(typeof i==="number"?Math.max(0,Math.min(i,SECTIONS.length-1)):Math.max(0,SECTIONS.findIndex(s=>s.id===i)));return <C.Provider value={{sections:SECTIONS,stepIndex,currentSection:SECTIONS[stepIndex],goNext,goToStep,isFirst:stepIndex===0,isLast:stepIndex===SECTIONS.length-1}}>{children}</C.Provider>} export const useJourney=()=>useContext(C);

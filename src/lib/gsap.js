@@ -1,0 +1,1 @@
+import { gsap } from "gsap"; import { ScrollTrigger } from "gsap/ScrollTrigger"; gsap.registerPlugin(ScrollTrigger); gsap.defaults({overwrite:"auto"}); export {gsap,ScrollTrigger};
