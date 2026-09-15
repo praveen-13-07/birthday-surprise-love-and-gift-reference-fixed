@@ -2,11 +2,13 @@ import {useEffect,useMemo,useRef,useState} from "react";
 import {AnimatePresence,motion} from "framer-motion";
 import {gsap} from "./lib/gsap";
 import Atmosphere from "./components/reactbits/Atmosphere";
+import EmojiLanyard from "./components/reactbits/EmojiLanyard";
 import MagneticButton from "./components/reactbits/MagneticButton";
 import SmoothScroll from "./components/SmoothScroll/SmoothScroll";
 import {JourneyProvider,useJourney} from "./context/JourneyContext";
 import {CONTENT as C} from "./data/content";
 import {GIRLFRIEND_PHOTOS} from "./data/photos";
+import {MEMORY_IMAGES} from "./data/memoryImages";
 import "./styles/global.css";
 
 function Frame({children}){
@@ -18,6 +20,7 @@ function Frame({children}){
       <button className="brand" onClick={()=>goToStep(0)} aria-label="Back to the beginning">for you <b>♥</b></button>
       <span className="counter">{String(stepIndex+1).padStart(2,"0")} / {String(sections.length).padStart(2,"0")}</span>
     </header>
+    <EmojiLanyard emoji="🧿"/>
     <div className="progress"><span style={{width:`${((stepIndex+1)/sections.length)*100}%`}}/></div>
     <nav className="side-nav" aria-label="Birthday chapters">
       {sections.map((section,i)=><button key={section.id} className={i===stepIndex?"active":""} onClick={()=>goToStep(i)} aria-label={`Go to chapter ${i+1}`}><span>{String(i+1).padStart(2,"0")}</span></button>)}
@@ -138,10 +141,13 @@ function Flower(){
 }
 
 function Memory(){
-  const {goNext}=useJourney();const [found,setFound]=useState(false);const items=useMemo(()=>["moon","film","letter","star","coffee","music"],[]);
+  const {goNext}=useJourney();const [found,setFound]=useState(false);
   return <Stage id="memory" photo={C.photos[4]} position="center">
     <div className="section-label">04 <span>memory hunt</span></div><h2 className="section-title">{C.memory.title}</h2><p className="section-sub">{C.memory.subtitle}</p>
-    <div className="memory-grid">{items.map((x,i)=><motion.button key={x} className={`memory-tile neo-tile ${found&&i===C.memory.correct?"found":""}`} onClick={()=>i===C.memory.correct?setFound(true):null} whileHover={{y:-8,rotate:i%2?2:-2}}>{found&&i===C.memory.correct?<><span className="tile-photo"><img src={C.photos[4].src} alt=""/></span><small>you found it</small></>:<><span className="tile-icon">{["☾","✦","✉","★","◌","♫"][i]}</span><small>open</small></>}</motion.button>)}</div>
+    <div className="memory-grid">{MEMORY_IMAGES.map((src,i)=><motion.button key={src} className={`memory-tile neo-tile ${found&&i===C.memory.correct?"found":""}`} onClick={()=>i===C.memory.correct?setFound(true):null} whileHover={{y:-8,rotate:i%2?2:-2}}>
+      <span className="memory-image"><img src={src} alt={`Memory ${String(i+1).padStart(2,"0")}`} /></span>
+      <small>{found&&i===C.memory.correct?"you found it":"open"}</small>
+    </motion.button>)}</div>
     {found&&<motion.div className="memory-reveal neo-card" initial={{opacity:0,scale:.8}} animate={{opacity:1,scale:1}}><b>✨</b><p>{C.memory.reveal}</p><MagneticButton onClick={goNext}>Show me our moments</MagneticButton></motion.div>}
   </Stage>
 }
