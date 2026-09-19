@@ -40,7 +40,7 @@ export const CONTENT = {
     title: "A letter I couldn't fit into one text",
     body: [
 
-      "Happy Birthday, Chakutty. ❤️",
+      "Happy Birthday, Chlakutty. ❤️",
 
       "En feelings ellathayum oru paragraph-la solla mudiyadhu… aana unakku enna sollanum-nu romba naala yosichitu irundhen. 🥹",
 

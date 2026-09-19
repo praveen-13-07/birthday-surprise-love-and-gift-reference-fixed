@@ -210,7 +210,7 @@ function FunnyArchive() {
   };
   return <Stage id="funny-archive" photo={C.photos[11]} position="center">
     <div className="section-label">12 <span>our chaos archive</span></div>
-    <h2 className="section-title">The funny side of you 🤣.</h2>
+    <h2 className="section-title">Photos sponsored by Yamuna 🤣.</h2>
     <p className="section-sub">vairu valikithu di sirichi sirichi 🤣.</p>
 
     <div className="funny-slider" onPointerDown={handlePointerDown} onPointerUp={handlePointerUp}>
