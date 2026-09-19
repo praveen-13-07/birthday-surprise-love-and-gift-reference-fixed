@@ -128,6 +128,9 @@ function EmojiBand({ maxSpeed = 50, minSpeed = 0, isMobile = false, emoji = "ðŸ§
 
   const bandTexture = useBandTexture();
   const emojiTexture = useEmojiTexture(emoji);
+  // Remembers the rope points that were last uploaded to the GPU, so the (allocation-heavy)
+  // geometry rebuild below only runs when the rope has actually moved.
+  const drawn = useRef({ pts: new Float64Array(12).fill(NaN), geo: null, mobile: isMobile });
 
   const [curve] = useState(
     () => new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
@@ -170,7 +173,21 @@ function EmojiBand({ maxSpeed = 50, minSpeed = 0, isMobile = false, emoji = "ðŸ§
       curve.points[1].copy(j2.current.lerped);
       curve.points[2].copy(j1.current.lerped);
       curve.points[3].copy(fixed.current.translation());
-      band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
+      const d = drawn.current;
+      let changed = d.geo !== band.current.geometry || d.mobile !== isMobile;
+      for (let k = 0; k < 4 && !changed; k++) {
+        const p = curve.points[k], o = k * 3;
+        if (!(Math.abs(p.x - d.pts[o]) <= 1e-5 && Math.abs(p.y - d.pts[o + 1]) <= 1e-5 && Math.abs(p.z - d.pts[o + 2]) <= 1e-5)) changed = true;
+      }
+      if (changed) {
+        for (let k = 0; k < 4; k++) {
+          const p = curve.points[k], o = k * 3;
+          d.pts[o] = p.x; d.pts[o + 1] = p.y; d.pts[o + 2] = p.z;
+        }
+        d.geo = band.current.geometry;
+        d.mobile = isMobile;
+        band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
+      }
       ang.copy(bead.current.angvel());
       rot.copy(bead.current.rotation());
       bead.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });

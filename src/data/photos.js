@@ -1,4 +1,4 @@
-export const PHOTOS = Array.from({length:11},(_,i)=>({
+export const PHOTOS = Array.from({length:12},(_,i)=>({
   id:`photo-${String(i+1).padStart(2,'0')}`,
   src:`/assets/photos/photo-${String(i+1).padStart(2,'0')}.jpg`
 }));

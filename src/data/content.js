@@ -20,7 +20,8 @@ export const CONTENT = {
     { src: "/assets/photos/photo-08.jpg", caption: "Walking through life side by side." },
     { src: "/assets/photos/photo-09.jpg", caption: "Even the smallest moments can feel special." },
     { src: "/assets/photos/photo-10.jpg", caption: "A little magic, a little madness, just like us." },
-    { src: "/assets/photos/photo-11.jpg", caption: "And one day, I hope our memories look this full." }
+    { src: "/assets/photos/photo-11.jpg", caption: "And one day, I hope our memories look this full." },
+    { src: "/assets/photos/photo-12.jpg", caption: "The kind of love that makes me feel like the luckiest person alive." },
   ],
   story: [
 
