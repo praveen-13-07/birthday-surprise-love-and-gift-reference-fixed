@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useRef,useState} from "react";
+import {useEffect,useRef,useState} from "react";
 import {AnimatePresence,motion} from "framer-motion";
 import {gsap} from "./lib/gsap";
 import Atmosphere from "./components/reactbits/Atmosphere";
@@ -12,7 +12,7 @@ import {MEMORY_IMAGES} from "./data/memoryImages";
 import "./styles/global.css";
 
 function Frame({children}){
-  const {stepIndex,sections,goToStep,isFirst}=useJourney();
+  const {stepIndex,sections,goToStep,isFirst,isLast}=useJourney();
   return <main className="universe">
     <Atmosphere/>
     <div className="paper-grid" aria-hidden="true"/>
@@ -27,6 +27,7 @@ function Frame({children}){
     </nav>
     {children}
     {!isFirst&&<button className="back-button neo-button neo-button--white" onClick={()=>goToStep(stepIndex-1)} aria-label="Go back to previous chapter">← Back</button>}
+    {!isLast&&<button className="next-button neo-button neo-button--blue" onClick={()=>goToStep(stepIndex+1)} aria-label="Go to next chapter">Next →</button>}
     <div className="corner-note">made with too much love <b>♥</b></div>
   </main>
 }
@@ -69,6 +70,7 @@ function LoveGate(){
   const [reaction,setReaction]=useState("normal");
   const [yesPressed,setYesPressed]=useState(false);
   const area=useRef(null);
+  const advanceTimer=useRef(null);
   const dodge=()=>{
     setReaction("cry");
     const r=area.current?.getBoundingClientRect();
@@ -80,10 +82,13 @@ function LoveGate(){
     setYesScale(s=>Math.min(1.45,s+.07));
   };
   const chooseYes=()=>{
+    clearTimeout(advanceTimer.current);
     setReaction("happy");
     setYesPressed(true);
-    setTimeout(goNext,450);
+    setNoPos({x:0,y:0});
+    advanceTimer.current=setTimeout(goNext,900);
   };
+  useEffect(()=>()=>clearTimeout(advanceTimer.current),[]);
   const reactionSrc={
     normal:"/assets/love-reactions/boy-normal.png",
     cry:"/assets/love-reactions/boy-cry.png",
@@ -93,7 +98,11 @@ function LoveGate(){
     <div className="section-label">01 <span>unlock the next chapter</span></div>
     <div className="question-card neo-card">
       <div className="card-tape" aria-hidden="true"/>
-      <div className={`love-reaction love-reaction--${reaction}`} aria-hidden="true"><img src={reactionSrc} alt=""/></div>
+      <AnimatePresence mode="wait">
+        <motion.div key={reaction} className={`love-reaction love-reaction--${reaction}`} aria-hidden="true" initial={{opacity:0,scale:.94}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:.94}} transition={{duration:.16}}>
+          <img src={reactionSrc} alt=""/>
+        </motion.div>
+      </AnimatePresence>
       <p className="eyebrow">one tiny question</p><h2>{C.loveGate.question}</h2><p className="hint">{C.loveGate.hint}</p>
       <div ref={area} className="choice-zone">
         <motion.button className="choice choice--yes neo-button neo-button--blue" animate={{scale:yesScale}} onPointerEnter={()=>setReaction("happy")} onFocus={()=>setReaction("happy")} onClick={chooseYes}>{C.loveGate.yes}</motion.button>
@@ -162,6 +171,73 @@ function Photos(){
   </Stage>
 }
 
+function FunnyArchive(){
+  const {goNext}=useJourney();
+  const [active,setActive]=useState(0);
+  const touchStart=useRef(0);
+  const funnyMedia=[
+    {type:"photo",src:"/assets/funny-photos/funny-photo-01.jpeg",caption:"One more silly memory of us."},
+    {type:"photo",src:"/assets/funny-photos/funny-photo-02.jpeg",caption:"Proof that we are never normal."},
+    {type:"photo",src:"/assets/funny-photos/funny-photo-03.jpeg",caption:"This is why I love our chaos."},
+    {type:"photo",src:"/assets/funny-photos/funny-photo-04.jpeg",caption:"Still laughing at this one."},
+    {type:"photo",src:"/assets/funny-photos/funny-photo-05.jpeg",caption:"Us being us. 😂"},
+    {type:"photo",src:"/assets/funny-photos/funny-photo-06.jpeg",caption:"Another memory I can't stop smiling at."},
+    {type:"photo",src:"/assets/funny-photos/funny-photo-07.jpeg",caption:"Too funny to leave in the camera roll."},
+    {type:"photo",src:"/assets/funny-photos/funny-photo-08.jpeg",caption:"Okay… this one wins. 😂"},
+    {type:"video",src:"/assets/funny-videos/funny-video-01.mp4",caption:"The chaos is even better in motion."},
+    {type:"video",src:"/assets/funny-videos/funny-video-02.mp4",caption:"A moment worth replaying. 😂"},
+    {type:"video",src:"/assets/funny-videos/funny-video-03.mp4",caption:"And finally… one last funny memory."}
+  ];
+  const item=funnyMedia[active];
+  const next=dir=>setActive(i=>(i+dir+funnyMedia.length)%funnyMedia.length);
+  const handlePointerDown=e=>{touchStart.current=e.clientX};
+  const handlePointerUp=e=>{
+    const distance=e.clientX-touchStart.current;
+    if(Math.abs(distance)>45)next(distance<0?1:-1);
+  };
+  return <Stage id="funny-archive" photo={C.photos[10]} position="center">
+    <div className="section-label">12 <span>our chaos archive</span></div>
+    <h2 className="section-title">The funny side of us.</h2>
+    <p className="section-sub">The memories we keep because they still make us laugh.</p>
+
+    <div className="funny-slider" onPointerDown={handlePointerDown} onPointerUp={handlePointerUp}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.div
+          key={active}
+          className={`funny-slide-card ${item.type==="video"?"funny-slide-card--video":""}`}
+          initial={{opacity:0,x:active%2?90:-90,rotate:active%2?7:-7}}
+          animate={{opacity:1,x:0,rotate:active%2?1.5:-1.5}}
+          exit={{opacity:0,x:-100,rotate:-8}}
+          transition={{duration:.48,ease:[.22,1,.36,1]}}
+          whileHover={{rotate:0,scale:1.01}}
+        >
+          <div className="funny-frame-media">
+            {item.type==="video"
+              ? <video src={item.src} controls preload="metadata" playsInline/>
+              : <img src={item.src} alt={`Funny memory ${String(active+1).padStart(2,"0")}`}/>}
+          </div>
+          <div className="funny-frame-caption">
+            <span>{String(active+1).padStart(2,"0")}</span>
+            <p>{item.caption}</p>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+      <div className="funny-stack-back funny-stack-back--one"/>
+      <div className="funny-stack-back funny-stack-back--two"/>
+    </div>
+
+    <div className="funny-slider-controls">
+      <button type="button" onClick={()=>next(-1)} aria-label="Previous funny memory">←</button>
+      <div aria-label={`Memory ${active+1} of ${funnyMedia.length}`}>
+        {funnyMedia.map((_,i)=><i key={i} className={i===active?"on":""}/>)}
+      </div>
+      <button type="button" onClick={()=>next(1)} aria-label="Next funny memory">→</button>
+    </div>
+
+    <MagneticButton onClick={goNext}>Keep the chaos going →</MagneticButton>
+  </Stage>
+}
+
 function Story(){
   const {goNext}=useJourney();const ref=useRef(null);useEffect(()=>{const ctx=gsap.context(()=>gsap.from(".story-item",{scrollTrigger:{trigger:".story-track",start:"top 75%"},opacity:0,x:-35,stagger:.18,duration:.8,ease:"power3.out"}),ref);return()=>ctx.revert()},[]);
   return <Stage id="story" photo={C.photos[6]} position="center"><div className="section-label">06 <span>the timeline</span></div><h2 className="section-title">A few chapters of us.</h2><div className="story-track" ref={ref}>{C.story.map((s,i)=><div className="story-item" key={s.year}><div className="story-year">{s.year}</div><div className="story-line"><span/></div><div className="story-content"><h3>{s.title}</h3><p>{s.text}</p></div><div className="story-index">0{i+1}</div></div>)}</div><MagneticButton onClick={goNext}>Read my letter →</MagneticButton></Stage>
@@ -204,7 +280,7 @@ function Final(){
 
 function Inner(){
   const {currentSection}=useJourney();
-  const map={welcome:Welcome,"love-gate":LoveGate,balloons:Balloons,flower:Flower,memory:Memory,photos:Photos,story:Story,letter:Letter,gift:Gift,cake:Cake,final:Final};
+  const map={welcome:Welcome,"love-gate":LoveGate,balloons:Balloons,flower:Flower,memory:Memory,photos:Photos,story:Story,letter:Letter,gift:Gift,cake:Cake,final:Final,"funny-archive":FunnyArchive};
   const Comp=map[currentSection.id];
   return <Frame><AnimatePresence mode="wait"><motion.div key={currentSection.id} initial={{opacity:0,scale:.985,y:15}} animate={{opacity:1,scale:1,y:0}} exit={{opacity:0,scale:1.015,y:-15}} transition={{duration:.55,ease:[.22,1,.36,1]}}><Comp/></motion.div></AnimatePresence></Frame>
 }
